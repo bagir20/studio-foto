@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Packages ─────────────────────────────────────────────
+model PackageCategory {
+  id          String    @id @default(cuid())
+  name        String    // contoh: "Wedding", "Product", "Portrait"
+  slug        String    @unique
+  packages    Package[]
+  createdAt   DateTime  @default(now())
+}
+
+model Package {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String?
+  coverImage  String          // URL dari Supabase Storage
+  isActive    Boolean         @default(true)
+  category    PackageCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  tiers       PackageTier[]
+  samples     PackageSample[]
+  bookings    Booking[]
+  createdAt   DateTime        @default(now())
+}
+
+// Tier = Bronze/Silver/Gold atau Basic/Premium/dll
+model PackageTier {
+  id          String   @id @default(cuid())
+  name        String   // contoh: "Basic", "Premium", "Exclusive"
+  price       Int      // dalam Rupiah
+  duration    Int      // dalam menit
+  includes    String[] // list fitur, contoh: ["2 outfit", "soft file 50 foto"]
+  package     Package  @relation(fields: [packageId], references: [id])
+  packageId   String
+  bookings    Booking[]
+}
+
+// Sample foto dari tiap package
+model PackageSample {
+  id          String   @id @default(cuid())
+  imageUrl    String   // URL dari Supabase Storage
+  caption     String?
+  package     Package  @relation(fields: [packageId], references: [id])
+  packageId   String
+  order       Int      @default(0)
+}
+
+// ─── Gallery ──────────────────────────────────────────────
+model GalleryCategory {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  photos      GalleryPhoto[]
+}
+
+model GalleryPhoto {
+  id          String          @id @default(cuid())
+  imageUrl    String          // URL dari Supabase Storage
+  caption     String?
+  category    GalleryCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  order       Int             @default(0)
+  createdAt   DateTime        @default(now())
+}
+
+// ─── Booking ──────────────────────────────────────────────
+model Booking {
+  id            String        @id @default(cuid())
+
+  // Data pemesan
+  clientName    String
+  clientEmail   String
+  clientPhone   String
+
+  // Paket yang dipilih
+  package       Package       @relation(fields: [packageId], references: [id])
+  packageId     String
+  tier          PackageTier   @relation(fields: [tierId], references: [id])
+  tierId        String
+
+  // Jadwal
+  date          DateTime
+  timeSlot      String        // contoh: "09:00", "13:00", "15:00"
+
+  // Status
+  status        BookingStatus @default(PENDING)
+  notes         String?       // catatan dari klien
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  DONE
+}
