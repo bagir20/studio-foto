@@ -35,7 +35,7 @@ export type Package = {
   categoryId: string;
   category: PackageCategory;
   tiers: PackageTier[];
-  samples: PackageSample[];
+ samples?: PackageSample[];
 };
 
 // Versi ringkas untuk list/card
