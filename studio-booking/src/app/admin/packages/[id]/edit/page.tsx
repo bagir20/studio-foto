@@ -9,7 +9,10 @@ export default async function EditPackagePage({ params }: Props) {
   const [pkg, categories] = await Promise.all([
     prisma.package.findUnique({
       where: { id },
-      include: { tiers: { orderBy: { price: "asc" } } },
+      include: {
+        tiers: { orderBy: { price: "asc" } },
+        samples: { orderBy: { order: "asc" } },
+      },
     }),
     prisma.packageCategory.findMany(),
   ]);
@@ -29,6 +32,11 @@ export default async function EditPackagePage({ params }: Props) {
       price: String(t.price),
       duration: String(t.duration),
       includes: t.includes.join("\n"),
+    })),
+    samples: pkg.samples.map((s) => ({
+      id: s.id,
+      imageUrl: s.imageUrl,
+      caption: s.caption ?? "",
     })),
   };
 
