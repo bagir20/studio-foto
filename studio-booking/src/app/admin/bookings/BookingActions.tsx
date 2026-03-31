@@ -7,18 +7,11 @@ import { cn } from "@/lib/utils";
 const statuses = ["PENDING", "CONFIRMED", "DONE", "CANCELLED"] as const;
 type Status = (typeof statuses)[number];
 
-const statusLabel: Record<Status, string> = {
-  PENDING: "Pending",
-  CONFIRMED: "Konfirmasi",
-  DONE: "Selesai",
-  CANCELLED: "Batal",
-};
-
-const statusStyle: Record<Status, string> = {
-  PENDING: "bg-amber-100 text-amber-700",
-  CONFIRMED: "bg-green-100 text-green-700",
-  DONE: "bg-stone-100 text-stone-600",
-  CANCELLED: "bg-red-100 text-red-700",
+const statusConfig: Record<Status, { label: string; className: string }> = {
+  PENDING: { label: "Pending", className: "bg-amber-100 text-amber-700" },
+  CONFIRMED: { label: "Confirmed", className: "bg-green-100 text-green-700" },
+  DONE: { label: "Done", className: "bg-stone-100 text-stone-500" },
+  CANCELLED: { label: "Cancelled", className: "bg-red-100 text-red-700" },
 };
 
 export default function BookingActions({
@@ -51,14 +44,12 @@ export default function BookingActions({
       onChange={(e) => handleChange(e.target.value as Status)}
       disabled={loading}
       className={cn(
-        "text-xs font-semibold px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400",
-        statusStyle[status]
+        "font-cinzel text-[10px] tracking-widest uppercase px-3 py-1.5 border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-black",
+        statusConfig[status].className
       )}
     >
       {statuses.map((s) => (
-        <option key={s} value={s}>
-          {statusLabel[s]}
-        </option>
+        <option key={s} value={s}>{statusConfig[s].label}</option>
       ))}
     </select>
   );

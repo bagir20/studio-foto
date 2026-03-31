@@ -9,15 +9,12 @@ import { formatRupiah, formatDuration, cn } from "@/lib/utils";
 import TimeSlotPicker from "./TimeSlotPicker";
 import type { Package } from "@/types";
 
-type Props = {
-  packages: Package[];
-};
+type Props = { packages: Package[] };
 
 export default function BookingForm({ packages }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Ambil packageId & tierId dari URL kalau ada (dari tombol "Pilih" di halaman paket)
   const defaultPackageId = searchParams.get("packageId") ?? "";
   const defaultTierId = searchParams.get("tierId") ?? "";
 
@@ -26,34 +23,21 @@ export default function BookingForm({ packages }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<BookingSchema>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<BookingSchema>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: {
-      packageId: defaultPackageId,
-      tierId: defaultTierId,
-    },
+    defaultValues: { packageId: defaultPackageId, tierId: defaultTierId },
   });
 
   const watchPackageId = watch("packageId");
   const watchDate = watch("date");
   const watchTimeSlot = watch("timeSlot");
-
-  // Paket yang sedang dipilih
   const selectedPackage = packages.find((p) => p.id === watchPackageId);
 
-  // Fetch slot terbooked saat tanggal berubah
   useEffect(() => {
     if (!watchDate) return;
     setLoadingSlots(true);
     setBookedSlots([]);
     setValue("timeSlot", "");
-
     fetch(`/api/booking?date=${watchDate}`)
       .then((r) => r.json())
       .then((data) => setBookedSlots(data.bookedSlots ?? []))
@@ -61,12 +45,9 @@ export default function BookingForm({ packages }: Props) {
       .finally(() => setLoadingSlots(false));
   }, [watchDate, setValue]);
 
-  // Tanggal minimum = besok
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split("T")[0];
-
-  // Tanggal maksimum = 3 bulan ke depan
   const maxDate = new Date();
   maxDate.setMonth(maxDate.getMonth() + 3);
   const maxDateStr = maxDate.toISOString().split("T")[0];
@@ -82,8 +63,6 @@ export default function BookingForm({ packages }: Props) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Terjadi kesalahan");
-
-      // Redirect ke halaman konfirmasi
       router.push(`/booking/konfirmasi?id=${json.data.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Terjadi kesalahan");
@@ -92,63 +71,73 @@ export default function BookingForm({ packages }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-14">
 
-      {/* ── Step 1: Pilih Paket ── */}
+      {/* Step 1 */}
       <div className="space-y-4">
-        <StepLabel number={1} label="Pilih paket" />
-        <div className="grid sm:grid-cols-2 gap-3">
+        <StepLabel number="01" label="Pilih Paket" />
+        <div className="space-y-2">
           {packages.map((pkg) => (
             <button
               key={pkg.id}
               type="button"
-              onClick={() => {
-                setValue("packageId", pkg.id, { shouldValidate: true });
-                setValue("tierId", "");
-              }}
+              onClick={() => { setValue("packageId", pkg.id, { shouldValidate: true }); setValue("tierId", ""); }}
               className={cn(
-                "text-left p-4 rounded-xl border-2 transition-all duration-200",
+                "w-full text-left px-5 py-4 border transition-all duration-200 flex items-center justify-between",
                 watchPackageId === pkg.id
-                  ? "border-amber-400 bg-amber-50"
-                  : "border-stone-200 hover:border-stone-300 bg-white"
+                  ? "border-black bg-black text-white"
+                  : "border-black/10 hover:border-black"
               )}
             >
-              <p className="font-semibold text-stone-900">{pkg.name}</p>
-              <p className="text-xs text-stone-400 mt-0.5">{pkg.category.name}</p>
+              <div>
+                <p className={`font-cinzel text-sm tracking-wide ${watchPackageId === pkg.id ? "text-white" : "text-black"}`}>
+                  {pkg.name.toUpperCase()}
+                </p>
+                <p className={`text-xs mt-0.5 ${watchPackageId === pkg.id ? "text-white/50" : "text-black/40"}`}>
+                  {pkg.category.name}
+                </p>
+              </div>
+              {watchPackageId === pkg.id && (
+                <span className="font-cinzel text-[10px] tracking-widest text-accent">Selected</span>
+              )}
             </button>
           ))}
         </div>
         {errors.packageId && <FieldError msg={errors.packageId.message} />}
       </div>
 
-      {/* ── Step 2: Pilih Tier ── */}
+      {/* Step 2 */}
       {selectedPackage && (
         <div className="space-y-4">
-          <StepLabel number={2} label="Pilih tier" />
-          <div className="space-y-3">
+          <StepLabel number="02" label="Pilih Tier" />
+          <div className="space-y-2">
             {selectedPackage.tiers.map((tier) => (
               <button
                 key={tier.id}
                 type="button"
                 onClick={() => setValue("tierId", tier.id, { shouldValidate: true })}
                 className={cn(
-                  "w-full text-left p-4 rounded-xl border-2 transition-all duration-200",
+                  "w-full text-left px-5 py-4 border transition-all duration-200",
                   watch("tierId") === tier.id
-                    ? "border-amber-400 bg-amber-50"
-                    : "border-stone-200 hover:border-stone-300 bg-white"
+                    ? "border-black bg-black text-white"
+                    : "border-black/10 hover:border-black"
                 )}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-stone-900">{tier.name}</p>
-                    <p className="text-xs text-stone-400">{formatDuration(tier.duration)}</p>
+                    <p className={`font-cinzel text-sm tracking-wide ${watch("tierId") === tier.id ? "text-white" : "text-black"}`}>
+                      {tier.name.toUpperCase()}
+                    </p>
+                    <p className={`text-xs mt-0.5 ${watch("tierId") === tier.id ? "text-white/50" : "text-black/40"}`}>
+                      {formatDuration(tier.duration)}
+                    </p>
                   </div>
-                  <p className="font-bold text-amber-600">{formatRupiah(tier.price)}</p>
+                  <p className="font-cinzel text-accent text-sm">{formatRupiah(tier.price)}</p>
                 </div>
-                <ul className="mt-2 space-y-0.5">
+                <ul className={`mt-3 space-y-1 ${watch("tierId") === tier.id ? "block" : "hidden"}`}>
                   {tier.includes.map((item) => (
-                    <li key={item} className="text-xs text-stone-500 flex gap-1.5">
-                      <span className="text-amber-500">✓</span> {item}
+                    <li key={item} className="text-xs text-white/60 flex gap-2">
+                      <span className="text-accent">—</span>{item}
                     </li>
                   ))}
                 </ul>
@@ -159,23 +148,23 @@ export default function BookingForm({ packages }: Props) {
         </div>
       )}
 
-      {/* ── Step 3: Pilih Tanggal ── */}
+      {/* Step 3 */}
       <div className="space-y-4">
-        <StepLabel number={3} label="Pilih tanggal" />
+        <StepLabel number="03" label="Pilih Tanggal" />
         <input
           type="date"
           min={minDate}
           max={maxDateStr}
           {...register("date")}
-          className="w-full sm:w-auto border border-stone-200 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+          className="border border-black/10 focus:border-black px-4 py-3 text-sm font-cinzel tracking-wide text-black focus:outline-none transition-colors w-full sm:w-auto"
         />
         {errors.date && <FieldError msg={errors.date.message} />}
       </div>
 
-      {/* ── Step 4: Pilih Jam ── */}
+      {/* Step 4 */}
       {watchDate && (
         <div className="space-y-4">
-          <StepLabel number={4} label="Pilih jam sesi" />
+          <StepLabel number="04" label="Pilih Jam" />
           <TimeSlotPicker
             selectedDate={watchDate}
             selectedSlot={watchTimeSlot ?? ""}
@@ -187,89 +176,70 @@ export default function BookingForm({ packages }: Props) {
         </div>
       )}
 
-      {/* ── Step 5: Data diri ── */}
+      {/* Step 5 */}
       <div className="space-y-4">
-        <StepLabel number={5} label="Data diri" />
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-stone-700">Nama lengkap</label>
-            <input
-              {...register("clientName")}
-              placeholder="Nama Kamu"
-              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-900 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-            />
-            {errors.clientName && <FieldError msg={errors.clientName.message} />}
-          </div>
+        <StepLabel number="05" label="Data Diri" />
+        <div className="space-y-3">
+          {[
+            { name: "clientName" as const, label: "Nama Lengkap", placeholder: "Nama Kamu", type: "text" },
+            { name: "clientPhone" as const, label: "Nomor WhatsApp", placeholder: "081234567890", type: "tel" },
+            { name: "clientEmail" as const, label: "Email", placeholder: "kamu@email.com", type: "email" },
+          ].map((field) => (
+            <div key={field.name} className="space-y-1.5">
+              <label className="font-cinzel text-[10px] tracking-[0.3em] uppercase text-black/40">
+                {field.label}
+              </label>
+              <input
+                {...register(field.name)}
+                type={field.type}
+                placeholder={field.placeholder}
+                className="w-full border border-black/10 focus:border-black px-4 py-3 text-sm text-black placeholder:text-black/20 focus:outline-none transition-colors"
+              />
+              {errors[field.name] && <FieldError msg={errors[field.name]?.message} />}
+            </div>
+          ))}
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-stone-700">Nomor WhatsApp</label>
-            <input
-              {...register("clientPhone")}
-              placeholder="081234567890"
-              type="tel"
-              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-900 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-            />
-            {errors.clientPhone && <FieldError msg={errors.clientPhone.message} />}
-          </div>
-
-          <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-sm font-medium text-stone-700">Email</label>
-            <input
-              {...register("clientEmail")}
-              placeholder="kamu@email.com"
-              type="email"
-              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-900 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-            />
-            {errors.clientEmail && <FieldError msg={errors.clientEmail.message} />}
-          </div>
-
-          <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-sm font-medium text-stone-700">
-              Catatan <span className="text-stone-400 font-normal">(opsional)</span>
+            <label className="font-cinzel text-[10px] tracking-[0.3em] uppercase text-black/40">
+              Catatan <span className="text-black/20">(opsional)</span>
             </label>
             <textarea
               {...register("notes")}
-              placeholder="Ada permintaan khusus? Tulis di sini..."
+              placeholder="Ada permintaan khusus?"
               rows={3}
-              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-stone-900 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent resize-none"
+              className="w-full border border-black/10 focus:border-black px-4 py-3 text-sm text-black placeholder:text-black/20 focus:outline-none transition-colors resize-none"
             />
-            {errors.notes && <FieldError msg={errors.notes.message} />}
           </div>
         </div>
       </div>
 
-      {/* ── Submit ── */}
       {submitError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+        <p className="text-red-500 text-xs font-cinzel tracking-widest uppercase border border-red-200 px-4 py-3">
           {submitError}
-        </div>
+        </p>
       )}
 
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-amber-400 hover:bg-amber-300 disabled:bg-stone-200 disabled:text-stone-400 text-stone-900 font-bold py-4 rounded-xl transition-all duration-200 text-lg"
+        className="w-full bg-black hover:bg-accent disabled:bg-black/20 text-white font-cinzel text-xs tracking-[0.3em] uppercase py-4 transition-all duration-300"
       >
-        {submitting ? "Memproses..." : "Konfirmasi Booking"}
+        {submitting ? "Processing..." : "Confirm Booking"}
       </button>
     </form>
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────
-
-function StepLabel({ number, label }: { number: number; label: string }) {
+function StepLabel({ number, label }: { number: string; label: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="w-7 h-7 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center justify-center shrink-0">
-        {number}
-      </span>
-      <h3 className="font-semibold text-stone-900">{label}</h3>
+    <div className="flex items-center gap-4 pb-2 border-b border-black/5">
+      <span className="font-cinzel text-[10px] text-accent tracking-widest">{number}</span>
+      <h3 className="font-cinzel text-sm tracking-[0.2em] uppercase text-black">{label}</h3>
     </div>
   );
 }
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
-  return <p className="text-red-500 text-xs mt-1">{msg}</p>;
+  return <p className="text-red-400 text-[10px] font-cinzel tracking-widest uppercase mt-1">{msg}</p>;
 }

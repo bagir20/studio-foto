@@ -35,10 +35,11 @@ const emptyTier: Tier = { name: "", price: "", duration: "", includes: "" };
 // Kompres + upload ke Supabase Storage
 async function uploadImage(file: File, bucket: string): Promise<string> {
   const compressed = await imageCompression(file, {
-    maxSizeMB: 0.5,        // maks 500KB
-    maxWidthOrHeight: 1280, // maks 1280px
-    useWebWorker: true,
-  });
+  maxSizeMB: 2,
+  maxWidthOrHeight: 2400,
+  useWebWorker: true,
+  initialQuality: 0.85,
+});
 
   const ext = file.name.split(".").pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;

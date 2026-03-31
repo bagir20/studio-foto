@@ -1,101 +1,87 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-
-const stats = [
-  { value: "200+", label: "Sesi selesai" },
-  { value: "5★", label: "Rating klien" },
-  { value: "3+", label: "Tahun pengalaman" },
-  { value: "10+", label: "Jenis paket" },
-];
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-stone-950">
-      <div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `radial-gradient(circle at 20% 50%, #d97706 0%, transparent 50%),
-                            radial-gradient(circle at 80% 20%, #78716c 0%, transparent 40%)`,
-        }}
-      />
-      <div className="relative max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
+    <section className="relative w-full min-h-screen overflow-hidden canvas-texture pt-20">
+      <div className="grid grid-cols-12 min-h-screen gap-0 px-8 md:px-12 pt-8 pb-0">
 
-        {/* Text */}
-        <div className="space-y-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.0 }}
-            className="inline-flex items-center gap-2 bg-stone-800 text-amber-400 text-xs font-semibold px-4 py-2 rounded-full tracking-widest uppercase"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Studio Foto Palangkaraya
-          </motion.div>
+        {/* Main image col */}
+        <motion.div
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.1, ease: "easeOut" }}
+          className="col-span-12 md:col-span-8 relative h-[70vh] md:h-[85vh]"
+        >
+          <div className="w-full h-full bg-stone-900 overflow-hidden relative">
+            <Image
+              src="/images/kiri.jpg"
+              alt="Wanpicture Studio"
+              fill
+              className="object-cover grayscale"
+              priority
+            />
+          </div>
+        </motion.div>
 
+        {/* Overlay teks besar */}
+        <div className="absolute inset-0 flex flex-col justify-center items-start px-12 md:px-24 z-10 pointer-events-none pt-20">
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-6xl font-bold text-white leading-tight tracking-tight"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="font-cinzel text-black text-6xl md:text-8xl lg:text-[9rem] leading-none tracking-[0.03em] mix-blend-difference pointer-events-auto"
+            style={{ filter: "invert(1)" }}
           >
-            Abadikan{" "}
-            <span className="text-amber-400">momen</span>{" "}
-            terbaikmu
+            BREWING<br />MEMORIES
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-stone-400 text-lg leading-relaxed max-w-md"
-          >
-            Studio foto profesional dengan berbagai paket sesuai kebutuhan.
-            Wedding, portrait, produk, dan masih banyak lagi.
-          </motion.p>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-wrap gap-4"
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="mt-10 pointer-events-auto"
           >
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                href="/booking"
-                className="inline-block bg-amber-400 hover:bg-amber-300 text-stone-900 font-bold px-8 py-4 rounded-full transition-colors duration-200"
-              >
-                Book Sekarang
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                href="/packages"
-                className="inline-block border border-stone-700 hover:border-stone-500 text-stone-300 hover:text-white font-medium px-8 py-4 rounded-full transition-colors duration-200"
-              >
-                Lihat Paket
-              </Link>
-            </motion.div>
+            <Link
+              href="/gallery"
+              className="inline-block border-b-2 border-accent text-white font-cinzel tracking-[0.3em] uppercase py-2 hover:text-accent transition-colors text-xs"
+            >
+              Explore Our Work
+            </Link>
           </motion.div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 + i * 0.08 }}
-              whileHover={{ y: -4 }}
-              className="bg-stone-900 border border-stone-800 rounded-2xl p-6 space-y-1 cursor-default"
-            >
-              <p className="text-3xl font-bold text-amber-400">{stat.value}</p>
-              <p className="text-stone-500 text-sm">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
+        {/* Featured card — kanan */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="hidden md:flex col-span-4 flex-col justify-end pb-16 pl-0"
+        >
+          <div className="bg-white p-8 relative -left-16 z-20 shadow-xl border border-black/5 canvas-texture">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-accent mb-3 font-bold">
+              Featured
+            </p>
+            <h2 className="font-cinzel text-xl mb-4 text-black">
+              Studio Profesional
+            </h2>
+            <p className="text-black/50 leading-relaxed text-sm mb-6 font-light">
+              Setiap sesi dirancang dengan detail — pencahayaan, komposisi, dan emosi
+              yang terabadikan dalam satu frame sempurna.
+            </p>
+            <div className="w-full h-36 overflow-hidden bg-stone-100 border border-black/5 relative">
+              <Image
+                src="/images/landscape.jpg"
+                alt="Featured sample"
+                fill
+                className="object-cover grayscale"
+              />
+            </div>
+          </div>
+        </motion.div>
 
       </div>
     </section>

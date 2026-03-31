@@ -14,42 +14,61 @@ export default async function AdminPackagesPage() {
   const packages = await getPackages();
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-8 space-y-8">
+
+      {/* Header */}
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Paket Foto</h1>
-          <p className="text-stone-500 text-sm mt-1">{packages.length} paket</p>
+          <p className="font-cinzel text-[10px] tracking-[0.5em] text-accent uppercase">Manajemen</p>
+          <h1 className="font-cinzel text-3xl text-stone-900 mt-1">Paket Foto</h1>
         </div>
         <Link
           href="/admin/packages/baru"
-          className="bg-amber-400 hover:bg-amber-300 text-stone-900 font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors"
+          className="bg-[#0f0f0f] hover:bg-accent text-white font-cinzel text-xs tracking-widest uppercase px-6 py-3 transition-all duration-300"
         >
           + Tambah Paket
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+      {/* List */}
+      <div className="bg-white border border-stone-200">
+        <div className="px-6 py-4 border-b border-stone-100">
+          <p className="font-cinzel text-xs tracking-widest uppercase text-stone-900">
+            {packages.length} Paket
+          </p>
+        </div>
+
         {packages.length === 0 ? (
-          <p className="px-6 py-12 text-center text-stone-400">Belum ada paket. Tambahkan yang pertama!</p>
+          <div className="px-6 py-16 text-center space-y-4">
+            <p className="font-cinzel text-xs tracking-widest uppercase text-stone-300">
+              Belum ada paket
+            </p>
+            <Link
+              href="/admin/packages/baru"
+              className="inline-block font-cinzel text-xs tracking-widest uppercase text-accent hover:underline"
+            >
+              Tambahkan sekarang →
+            </Link>
+          </div>
         ) : (
           <div className="divide-y divide-stone-50">
             {packages.map((pkg) => (
-              <div key={pkg.id} className="px-6 py-4 flex items-center gap-4">
+              <div key={pkg.id} className="px-6 py-5 flex items-center gap-4 hover:bg-stone-50 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-stone-900">{pkg.name}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="font-cinzel text-sm text-stone-900 tracking-wide">{pkg.name}</p>
                     {!pkg.isActive && (
-                      <span className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full">
+                      <span className="font-cinzel text-[10px] tracking-widest uppercase bg-stone-100 text-stone-400 px-2 py-0.5">
                         Nonaktif
                       </span>
                     )}
                   </div>
-                  <p className="text-stone-400 text-xs mt-0.5">{pkg.category.name}</p>
+                  <p className="text-stone-400 text-xs mt-1">{pkg.category.name}</p>
                 </div>
 
-                <div className="hidden md:flex items-center gap-2">
+                <div className="hidden lg:flex items-center gap-2">
                   {pkg.tiers.map((t) => (
-                    <span key={t.id} className="text-xs bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full">
+                    <span key={t.id} className="font-cinzel text-[10px] tracking-widest uppercase bg-stone-50 border border-stone-100 text-stone-500 px-3 py-1">
                       {t.name}: {formatRupiah(t.price)}
                     </span>
                   ))}
@@ -58,7 +77,7 @@ export default async function AdminPackagesPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <Link
                     href={`/admin/packages/${pkg.id}/edit`}
-                    className="text-xs font-medium text-stone-600 hover:text-stone-900 px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
+                    className="font-cinzel text-[10px] tracking-widest uppercase text-stone-500 hover:text-black border border-stone-200 hover:border-black px-4 py-2 transition-all"
                   >
                     Edit
                   </Link>

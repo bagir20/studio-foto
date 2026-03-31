@@ -14,7 +14,7 @@ export default function DeletePackageButton({
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm(`Hapus paket "${packageName}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+    if (!confirm(`Hapus paket "${packageName}"?`)) return;
     setLoading(true);
     await fetch(`/api/admin/packages/${packageId}`, { method: "DELETE" });
     router.refresh();
@@ -25,7 +25,7 @@ export default function DeletePackageButton({
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="text-xs font-medium text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg border border-red-100 hover:border-red-200 transition-colors disabled:opacity-50"
+      className="font-cinzel text-[10px] tracking-widest uppercase text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-4 py-2 transition-all disabled:opacity-50"
     >
       {loading ? "..." : "Hapus"}
     </button>

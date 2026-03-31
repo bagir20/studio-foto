@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/packages", label: "Packages" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/packages", label: "Paket" },
-  { href: "/booking", label: "Booking" },
 ];
 
 export default function Navbar() {
@@ -18,114 +17,100 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100">
-      <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-black/5">
+      <nav className="flex justify-between items-center w-full px-8 md:px-12 py-5">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <motion.span
-            whileHover={{ scale: 1.1 }}
-            className="w-7 h-7 rounded-full bg-stone-900 flex items-center justify-center"
-          >
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-          </motion.span>
-          <span className="font-semibold text-stone-900 tracking-tight text-lg">
-            wanpicture
+        <Link href="/" className="flex items-center">
+          <span className="text-xl font-bold tracking-[0.3em] text-black font-cinzel">
+            WANPICTURE
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex gap-10 items-center">
           {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={cn(
-                  "relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200",
-                  pathname === link.href
-                    ? "text-white"
-                    : "text-stone-500 hover:text-stone-900"
-                )}
-              >
-                {pathname === link.href && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 bg-stone-900 rounded-full"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                  />
-                )}
-                <span className="relative z-10">{link.label}</span>
-              </Link>
-            </li>
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "font-cinzel text-xs tracking-widest uppercase transition-colors relative pb-1",
+                pathname === link.href
+                  ? "text-black font-semibold border-b-2 border-black"
+                  : "text-black/50 hover:text-black"
+              )}
+            >
+              {link.label}
+            </Link>
           ))}
-        </ul>
+        </div>
 
         {/* CTA */}
-        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="hidden md:block">
-          <Link
-            href="/booking"
-            className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-stone-900 font-semibold text-sm px-5 py-2.5 rounded-full transition-colors duration-200"
-          >
-            Book Sekarang
-          </Link>
-        </motion.div>
+        <Link
+          href="/booking"
+          className="hidden md:inline-block bg-accent text-white px-8 py-3 text-xs tracking-[0.2em] uppercase font-cinzel hover:brightness-110 active:scale-95 transition-all duration-200"
+        >
+          Book Now
+        </Link>
 
         {/* Hamburger */}
         <button
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className="md:hidden p-2"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
-          <motion.span
-            animate={menuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-            className="block w-5 h-0.5 bg-stone-900 origin-center"
-          />
-          <motion.span
-            animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-            className="block w-5 h-0.5 bg-stone-900"
-          />
-          <motion.span
-            animate={menuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-            className="block w-5 h-0.5 bg-stone-900 origin-center"
-          />
+          <div className="w-6 space-y-1.5">
+            <motion.span
+              animate={menuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+              className="block w-full h-px bg-black origin-center"
+            />
+            <motion.span
+              animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
+              className="block w-full h-px bg-black"
+            />
+            <motion.span
+              animate={menuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+              className="block w-full h-px bg-black origin-center"
+            />
+          </div>
         </button>
       </nav>
 
       {/* Mobile menu */}
-      <motion.div
-        initial={false}
-        animate={menuOpen ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
-        transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="md:hidden overflow-hidden bg-white border-t border-stone-100"
-      >
-        <ul className="px-6 py-4 flex flex-col gap-1">
-          {navLinks.map((link) => (
-            <li key={link.href}>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden bg-white border-t border-black/5 overflow-hidden"
+          >
+            <div className="px-8 py-6 flex flex-col gap-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={cn(
+                    "font-cinzel text-xs tracking-widest uppercase py-2",
+                    pathname === link.href ? "text-black font-semibold" : "text-black/50"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <Link
-                href={link.href}
+                href="/booking"
                 onClick={() => setMenuOpen(false)}
-                className={cn(
-                  "block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                  pathname === link.href
-                    ? "bg-stone-900 text-white"
-                    : "text-stone-600 hover:bg-stone-100"
-                )}
+                className="mt-2 bg-accent text-white px-6 py-3 text-xs tracking-[0.2em] uppercase font-cinzel text-center"
               >
-                {link.label}
+                Book Now
               </Link>
-            </li>
-          ))}
-          <li className="mt-2">
-            <Link
-              href="/booking"
-              onClick={() => setMenuOpen(false)}
-              className="block text-center bg-amber-400 text-stone-900 font-semibold text-sm px-4 py-2.5 rounded-xl"
-            >
-              Book Sekarang
-            </Link>
-          </li>
-        </ul>
-      </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

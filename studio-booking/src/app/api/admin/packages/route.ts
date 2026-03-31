@@ -9,6 +9,15 @@ export async function POST(request: NextRequest) {
     const { name, slug, description, coverImage, isActive, categoryId, tiers, samples } =
       await request.json();
 
+    // Cek slug sudah dipakai
+    const existing = await prisma.package.findUnique({ where: { slug } });
+    if (existing) {
+      return NextResponse.json(
+        { error: `Slug "${slug}" sudah dipakai paket lain. Gunakan slug yang berbeda.` },
+        { status: 409 }
+      );
+    }
+
     const pkg = await prisma.package.create({
       data: {
         name, slug, description, coverImage, isActive, categoryId,

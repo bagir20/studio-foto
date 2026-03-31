@@ -22,6 +22,11 @@ async function main() {
       update: {},
       create: { name: "Product", slug: "product" },
     }),
+     prisma.packageCategory.upsert({
+      where: { slug: "event-wedding" },
+      update: {},
+      create: { name: "Event & Wedding", slug: "event-wedding" },
+    }),
   ]);
   console.log("✅ Gallery categories:", galCats.map((c) => c.name));
 

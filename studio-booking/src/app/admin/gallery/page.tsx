@@ -16,10 +16,10 @@ export default async function AdminGalleryPage() {
   const { photos, categories } = await getData();
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Gallery</h1>
-        <p className="text-stone-500 text-sm mt-1">{photos.length} foto</p>
+        <p className="font-cinzel text-[10px] tracking-[0.5em] text-accent uppercase">Manajemen</p>
+        <h1 className="font-cinzel text-3xl text-stone-900 mt-1">Gallery</h1>
       </div>
       <GalleryAdminGrid photos={photos} categories={categories} />
     </div>

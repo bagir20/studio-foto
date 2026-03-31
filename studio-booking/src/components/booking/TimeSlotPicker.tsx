@@ -2,10 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-const ALL_SLOTS = [
-  "08:00", "09:00", "10:00", "11:00",
-  "13:00", "14:00", "15:00", "16:00",
-];
+const ALL_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
 type Props = {
   selectedDate: string;
@@ -15,17 +12,12 @@ type Props = {
   loading: boolean;
 };
 
-export default function TimeSlotPicker({
-  selectedSlot,
-  bookedSlots,
-  onSelect,
-  loading,
-}: Props) {
+export default function TimeSlotPicker({ selectedSlot, bookedSlots, onSelect, loading }: Props) {
   if (loading) {
     return (
       <div className="grid grid-cols-4 gap-2">
         {ALL_SLOTS.map((s) => (
-          <div key={s} className="h-10 rounded-xl bg-stone-100 animate-pulse" />
+          <div key={s} className="h-10 bg-stone-100 animate-pulse" />
         ))}
       </div>
     );
@@ -36,7 +28,6 @@ export default function TimeSlotPicker({
       {ALL_SLOTS.map((slot) => {
         const isBooked = bookedSlots.includes(slot);
         const isSelected = selectedSlot === slot;
-
         return (
           <button
             key={slot}
@@ -44,12 +35,12 @@ export default function TimeSlotPicker({
             disabled={isBooked}
             onClick={() => onSelect(slot)}
             className={cn(
-              "py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border",
+              "py-2.5 font-cinzel text-xs tracking-widest border transition-all duration-200",
               isBooked
-                ? "bg-stone-100 text-stone-300 border-stone-100 cursor-not-allowed line-through"
+                ? "border-black/5 text-black/20 cursor-not-allowed line-through"
                 : isSelected
-                ? "bg-stone-900 text-white border-stone-900"
-                : "bg-white text-stone-700 border-stone-200 hover:border-amber-400 hover:text-amber-600"
+                ? "border-black bg-black text-white"
+                : "border-black/10 text-black hover:border-black"
             )}
           >
             {slot}

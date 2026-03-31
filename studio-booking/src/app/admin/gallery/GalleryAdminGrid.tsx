@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import imageCompression from "browser-image-compression";
 import type { GalleryPhoto, GalleryCategory } from "@/types";
 
 const supabase = createClient(
@@ -43,23 +44,31 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
     setError("");
 
     try {
-      // 1. Upload ke Supabase Storage
+      // 1. Kompres foto
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 2400,
+        useWebWorker: true,
+        initialQuality: 0.85,
+      });
+
+      // 2. Upload ke Supabase Storage
       const ext = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("gallery")
-        .upload(fileName, file, { cacheControl: "3600", upsert: false });
+        .upload(fileName, compressed, { cacheControl: "3600", upsert: false });
 
       if (uploadError) throw new Error(uploadError.message);
 
-      // 2. Ambil URL publik
+      // 3. Ambil URL publik
       const { data: urlData } = supabase.storage
         .from("gallery")
         .getPublicUrl(fileName);
       const imageUrl = urlData.publicUrl;
 
-      // 3. Simpan ke database via API
+      // 4. Simpan ke database via API
       const res = await fetch("/api/admin/gallery", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,7 +80,6 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
         throw new Error(data.error ?? "Gagal menyimpan ke database");
       }
 
-      // Reset form
       setFile(null);
       setPreview(null);
       setCaption("");
@@ -88,13 +96,11 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
     if (!confirm("Hapus foto ini?")) return;
     setDeleting(id);
 
-    // Hapus dari Storage
     const fileName = imageUrl.split("/").pop();
     if (fileName) {
       await supabase.storage.from("gallery").remove([fileName]);
     }
 
-    // Hapus dari database
     await fetch(`/api/admin/gallery/${id}`, { method: "DELETE" });
     router.refresh();
     setDeleting(null);
@@ -104,30 +110,22 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
     <div className="space-y-8">
 
       {/* Form upload */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6">
-        <h2 className="font-semibold text-stone-900 mb-4">Upload Foto</h2>
+      <div className="bg-white border border-stone-200 p-6">
+        <p className="font-cinzel text-xs tracking-widest uppercase text-stone-900 mb-6">Upload Foto</p>
         <form onSubmit={handleUpload} className="space-y-4">
-
-          {/* Drop zone */}
           <div
             onClick={() => fileInputRef.current?.click()}
             className="border-2 border-dashed border-stone-200 hover:border-amber-400 rounded-xl p-8 text-center cursor-pointer transition-colors"
           >
             {preview ? (
               <div className="relative w-40 h-40 mx-auto rounded-xl overflow-hidden">
-                <Image
-                  src={preview}
-                  alt="Preview"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                <Image src={preview} alt="Preview" fill className="object-cover" unoptimized />
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-stone-400 text-4xl">[ foto ]</p>
                 <p className="text-stone-600 text-sm font-medium">Klik untuk pilih foto</p>
-                <p className="text-stone-400 text-xs">JPG, PNG, WEBP — maks 5MB</p>
+                <p className="text-stone-400 text-xs">JPG, PNG, WEBP — auto dikompres 2MB, 2400px</p>
               </div>
             )}
             <input
@@ -141,9 +139,7 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">
-                Kategori
-              </label>
+              <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">Kategori</label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -178,35 +174,23 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
             disabled={uploading || !file}
             className="bg-amber-400 hover:bg-amber-300 disabled:bg-stone-100 disabled:text-stone-400 text-stone-900 font-semibold text-sm px-6 py-2.5 rounded-xl transition-colors"
           >
-            {uploading ? "Mengupload..." : "Upload Foto"}
+            {uploading ? "Mengompres & mengupload..." : "Upload Foto"}
           </button>
         </form>
       </div>
 
       {/* Grid foto */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6">
-        <h2 className="font-semibold text-stone-900 mb-4">
-          Foto Tersimpan{" "}
-          <span className="text-stone-400 font-normal">({photos.length})</span>
-        </h2>
+       <div className="bg-white border border-stone-200 p-6">
+        <p className="font-cinzel text-xs tracking-widest uppercase text-stone-900 mb-6">
+          Foto Tersimpan <span className="text-stone-400 font-normal">({photos.length})</span>
+        </p>
         {photos.length === 0 ? (
-          <p className="text-center py-8 text-stone-400 text-sm">
-            Belum ada foto. Upload di atas!
-          </p>
+          <p className="text-center py-8 text-stone-400 text-sm">Belum ada foto. Upload di atas!</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {photos.map((photo) => (
-              <div
-                key={photo.id}
-                className="group relative rounded-xl overflow-hidden bg-stone-100 aspect-square"
-              >
-                <Image
-                  src={photo.imageUrl}
-                  alt={photo.caption ?? "Gallery"}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+              <div key={photo.id} className="group relative rounded-xl overflow-hidden bg-stone-100 aspect-square">
+                <Image src={photo.imageUrl} alt={photo.caption ?? "Gallery"} fill className="object-cover" unoptimized />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
                   <span className="text-xs bg-black/40 text-white px-2 py-1 rounded-full self-start">
                     {photo.category.name}
