@@ -46,12 +46,14 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    await prisma.booking.deleteMany({ where: { packageId: id } });
     await prisma.packageTier.deleteMany({ where: { packageId: id } });
     await prisma.packageSample.deleteMany({ where: { packageId: id } });
     await prisma.package.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Gagal hapus paket";
+    console.error("[DELETE /api/admin/packages/[id]]", error);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

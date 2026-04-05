@@ -116,9 +116,17 @@ export default async function PackagesPage({ searchParams }: Props) {
                           {pkg.name.toUpperCase()}
                         </h3>
                         {pkg.description && (
-                          <p className="hidden sm:block text-black/40 text-xs mt-1 font-light leading-relaxed line-clamp-2">
-                            {pkg.description}
-                          </p>
+                         <p
+  className="hidden sm:block text-black/40 text-xs mt-1 font-light leading-relaxed overflow-hidden"
+  style={{
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  }}
+>
+  {pkg.description}
+</p>
                         )}
                       </div>
                       {startingPrice && (

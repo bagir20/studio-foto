@@ -23,66 +23,123 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
 
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [caption, setCaption] = useState("");
-  const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [editingCat, setEditingCat] = useState<{ id: string; name: string } | null>(null);
+  const [deletingCat, setDeletingCat] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-    setFile(selected);
-    setPreview(URL.createObjectURL(selected));
+    const selected = Array.from(e.target.files ?? []);
+    if (!selected.length) return;
+    setFiles(selected);
+    setPreviews(selected.map((f) => URL.createObjectURL(f)));
     setError("");
   };
 
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategory.trim()) return;
+    setAddingCategory(true);
+    try {
+      const res = await fetch("/api/admin/gallery/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCategory.trim() }),
+      });
+      if (!res.ok) throw new Error("Gagal menambah kategori");
+      setNewCategory("");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menambah kategori");
+    } finally {
+      setAddingCategory(false);
+    }
+  };
+
+  const handleEditCategory = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!editingCat) return;
+  try {
+    const res = await fetch(`/api/admin/gallery/categories/${editingCat.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editingCat.name }),
+    });
+    if (!res.ok) throw new Error("Gagal edit kategori");
+    setEditingCat(null);
+    router.refresh();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Gagal edit kategori");
+  }
+};
+
+const handleDeleteCategory = async (id: string) => {
+  if (!confirm("Hapus kategori ini? Foto dalam kategori ini tidak ikut terhapus.")) return;
+  setDeletingCat(id);
+  try {
+    const res = await fetch(`/api/admin/gallery/categories/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Gagal hapus kategori");
+    router.refresh();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Gagal hapus kategori");
+  } finally {
+    setDeletingCat(null);
+  }
+};
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) { setError("Pilih foto terlebih dahulu"); return; }
+    if (!files.length) { setError("Pilih foto terlebih dahulu"); return; }
     setUploading(true);
+    setUploadProgress(0);
     setError("");
 
     try {
-      // 1. Kompres foto
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 2400,
-        useWebWorker: true,
-        initialQuality: 0.85,
-      });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
-      // 2. Upload ke Supabase Storage
-      const ext = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 0.8,
+          maxWidthOrHeight: 1600,
+          useWebWorker: true,
+          initialQuality: 0.8,
+        });
 
-      const { error: uploadError } = await supabase.storage
-        .from("gallery")
-        .upload(fileName, compressed, { cacheControl: "3600", upsert: false });
+        const ext = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      if (uploadError) throw new Error(uploadError.message);
+        const { error: uploadError } = await supabase.storage
+          .from("gallery")
+          .upload(fileName, compressed, { cacheControl: "3600", upsert: false });
 
-      // 3. Ambil URL publik
-      const { data: urlData } = supabase.storage
-        .from("gallery")
-        .getPublicUrl(fileName);
-      const imageUrl = urlData.publicUrl;
+        if (uploadError) throw new Error(uploadError.message);
 
-      // 4. Simpan ke database via API
-      const res = await fetch("/api/admin/gallery", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl, caption, categoryId }),
-      });
+        const { data: urlData } = supabase.storage.from("gallery").getPublicUrl(fileName);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Gagal menyimpan ke database");
+        const res = await fetch("/api/admin/gallery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageUrl: urlData.publicUrl, caption, categoryId }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error ?? "Gagal menyimpan ke database");
+        }
+
+        setUploadProgress(i + 1);
       }
 
-      setFile(null);
-      setPreview(null);
+      setFiles([]);
+      setPreviews([]);
       setCaption("");
+      setUploadProgress(0);
       if (fileInputRef.current) fileInputRef.current.value = "";
       router.refresh();
     } catch (err) {
@@ -109,33 +166,114 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
   return (
     <div className="space-y-8">
 
-      {/* Form upload */}
+      {/* Kelola Kategori */}
+      <div className="bg-white border border-stone-200 p-6">
+        <p className="font-cinzel text-xs tracking-widest uppercase text-stone-900 mb-4">Kelola Kategori</p>
+        <form onSubmit={handleAddCategory} className="flex gap-3">
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Nama kategori baru..."
+            className="flex-1 border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <button
+            type="submit"
+            disabled={addingCategory || !newCategory.trim()}
+            className="bg-amber-400 hover:bg-amber-300 disabled:bg-stone-100 disabled:text-stone-400 text-stone-900 font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+          >
+            {addingCategory ? "Menyimpan..." : "+ Tambah"}
+          </button>
+        </form>
+
+        <div className="flex flex-wrap gap-2 mt-4">
+  {categories.map((cat) => (
+    <div key={cat.id} className="flex items-center gap-1 bg-stone-100 rounded-full px-3 py-1.5">
+      {editingCat?.id === cat.id ? (
+        <form onSubmit={handleEditCategory} className="flex items-center gap-1">
+          <input
+            value={editingCat.name}
+            onChange={(e) => setEditingCat({ ...editingCat, name: e.target.value })}
+            className="text-xs border border-amber-400 rounded px-2 py-0.5 w-24 focus:outline-none"
+            autoFocus
+          />
+          <button type="submit" className="text-xs text-amber-600 font-semibold hover:text-amber-700">✓</button>
+          <button type="button" onClick={() => setEditingCat(null)} className="text-xs text-stone-400 hover:text-stone-600">✕</button>
+        </form>
+      ) : (
+        <>
+          <span className="text-xs text-stone-600 font-medium">{cat.name}</span>
+          <button
+            onClick={() => setEditingCat({ id: cat.id, name: cat.name })}
+            className="text-stone-400 hover:text-amber-500 transition-colors ml-1 text-xs"
+          >
+            ✎
+          </button>
+          <button
+            onClick={() => handleDeleteCategory(cat.id)}
+            disabled={deletingCat === cat.id}
+            className="text-stone-400 hover:text-red-500 transition-colors text-xs disabled:opacity-50"
+          >
+            ×
+          </button>
+        </>
+      )}
+    </div>
+  ))}
+</div>
+      </div>
+
+      {/* Form Upload */}
       <div className="bg-white border border-stone-200 p-6">
         <p className="font-cinzel text-xs tracking-widest uppercase text-stone-900 mb-6">Upload Foto</p>
         <form onSubmit={handleUpload} className="space-y-4">
+
+          {/* Drop zone */}
           <div
             onClick={() => fileInputRef.current?.click()}
             className="border-2 border-dashed border-stone-200 hover:border-amber-400 rounded-xl p-8 text-center cursor-pointer transition-colors"
           >
-            {preview ? (
-              <div className="relative w-40 h-40 mx-auto rounded-xl overflow-hidden">
-                <Image src={preview} alt="Preview" fill className="object-cover" unoptimized />
+            {previews.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {previews.map((src, i) => (
+                    <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image src={src} alt={`Preview ${i}`} fill className="object-cover" unoptimized />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-stone-500 text-sm font-medium">{files.length} foto dipilih — klik untuk ganti</p>
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-stone-400 text-4xl">[ foto ]</p>
                 <p className="text-stone-600 text-sm font-medium">Klik untuk pilih foto</p>
-                <p className="text-stone-400 text-xs">JPG, PNG, WEBP — auto dikompres 2MB, 2400px</p>
+                <p className="text-stone-400 text-xs">Bisa pilih banyak sekaligus — auto dikompres</p>
               </div>
             )}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleFileChange}
               className="hidden"
             />
           </div>
+
+          {/* Progress bar */}
+          {uploading && files.length > 1 && (
+            <div className="space-y-1.5">
+              <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-amber-400 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(uploadProgress / files.length) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-stone-400 text-center">
+                Mengupload {uploadProgress} dari {files.length} foto...
+              </p>
+            </div>
+          )}
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -171,16 +309,18 @@ export default function GalleryAdminGrid({ photos, categories }: Props) {
 
           <button
             type="submit"
-            disabled={uploading || !file}
+            disabled={uploading || !files.length}
             className="bg-amber-400 hover:bg-amber-300 disabled:bg-stone-100 disabled:text-stone-400 text-stone-900 font-semibold text-sm px-6 py-2.5 rounded-xl transition-colors"
           >
-            {uploading ? "Mengompres & mengupload..." : "Upload Foto"}
+            {uploading
+              ? `Mengupload ${files.length > 1 ? `(${uploadProgress}/${files.length})` : ""}...`
+              : `Upload ${files.length > 1 ? `${files.length} Foto` : "Foto"}`}
           </button>
         </form>
       </div>
 
       {/* Grid foto */}
-       <div className="bg-white border border-stone-200 p-6">
+      <div className="bg-white border border-stone-200 p-6">
         <p className="font-cinzel text-xs tracking-widest uppercase text-stone-900 mb-6">
           Foto Tersimpan <span className="text-stone-400 font-normal">({photos.length})</span>
         </p>

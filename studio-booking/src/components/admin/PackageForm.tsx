@@ -32,26 +32,34 @@ type Props = {
 
 const emptyTier: Tier = { name: "", price: "", duration: "", includes: "" };
 
-// Kompres + upload ke Supabase Storage
-async function uploadImage(file: File, bucket: string): Promise<string> {
+// Untuk cover
+async function uploadCover(file: File): Promise<string> {
   const compressed = await imageCompression(file, {
-  maxSizeMB: 2,
-  maxWidthOrHeight: 2400,
-  useWebWorker: true,
-  initialQuality: 0.85,
-});
-
+    maxSizeMB: 0.8,
+    maxWidthOrHeight: 1600,
+    useWebWorker: true,
+    initialQuality: 0.8,
+  });
   const ext = file.name.split(".").pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-  const { error } = await supabase.storage
-    .from(bucket)
-    .upload(fileName, compressed, { cacheControl: "3600", upsert: false });
-
+  const { error } = await supabase.storage.from("gallery").upload(fileName, compressed, { cacheControl: "3600", upsert: false });
   if (error) throw new Error(error.message);
+  return supabase.storage.from("gallery").getPublicUrl(fileName).data.publicUrl;
+}
 
-  const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
-  return data.publicUrl;
+// Untuk sample foto
+async function uploadSample(file: File): Promise<string> {
+  const compressed = await imageCompression(file, {
+    maxSizeMB: 0.4,
+    maxWidthOrHeight: 1000,
+    useWebWorker: true,
+    initialQuality: 0.8,
+  });
+  const ext = file.name.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from("gallery").upload(fileName, compressed, { cacheControl: "3600", upsert: false });
+  if (error) throw new Error(error.message);
+  return supabase.storage.from("gallery").getPublicUrl(fileName).data.publicUrl;
 }
 
 export default function PackageForm({ categories, initialData }: Props) {
@@ -96,7 +104,7 @@ export default function PackageForm({ categories, initialData }: Props) {
     setUploadingCover(true);
     setError("");
     try {
-      const url = await uploadImage(file, "gallery");
+      const url = await uploadCover(file);
       setForm((f) => ({ ...f, coverImage: url }));
       setCoverPreview(url);
     } catch (err) {
@@ -113,7 +121,7 @@ export default function PackageForm({ categories, initialData }: Props) {
     setUploadingSample(true);
     setError("");
     try {
-      const urls = await Promise.all(files.map((f) => uploadImage(f, "gallery")));
+      const urls = await Promise.all(files.map((f) => uploadSample(f)));
       setSamples((prev) => [
         ...prev,
         ...urls.map((url) => ({ imageUrl: url, caption: "" })),

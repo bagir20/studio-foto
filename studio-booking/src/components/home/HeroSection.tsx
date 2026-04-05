@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
-    <section className="relative w-full min-h-screen overflow-hidden bg-white">
+    <section className="relative w-full overflow-hidden bg-white">
 
       {/* ── DESKTOP ── */}
       <div className="hidden md:flex w-full min-h-screen">
@@ -142,13 +142,13 @@ export default function HeroSection() {
             className="absolute bottom-6 left-6 font-cinzel text-[8rem] leading-none text-white/[0.07] select-none pointer-events-none tracking-tighter"
             aria-hidden
           >
-            01
+            WANPICTURE
           </div>
         </motion.div>
       </div>
 
       {/* ── MOBILE: Hard Split vertikal (atas foto, bawah teks) ── */}
-      <div className="md:hidden flex flex-col w-full min-h-screen">
+      <div className="md:hidden flex flex-col w-full">
 
         {/* ATAS: foto */}
         <motion.div
@@ -175,7 +175,7 @@ export default function HeroSection() {
         />
 
         {/* BAWAH: teks — putih solid */}
-        <div className="flex-1 bg-white px-5 pt-7 pb-10 flex flex-col justify-between">
+        <div className="flex-1 bg-white px-5 pt-7 pb-4 flex flex-col justify-between">
 
           <div>
             <motion.p

@@ -8,7 +8,7 @@ export default function LimboSection() {
     <section className="canvas-texture w-full overflow-hidden bg-white">
 
       {/* ── INTRO ── */}
-      <div className="relative w-full px-5 sm:px-8 md:px-12 pt-0 md:pt-0 pb-0">
+      <div className="relative w-full px-5 sm:px-8 md:px-12 pt-2 md:pt-0 pb-0">
 
         {/* Ghost watermark */}
         <p
