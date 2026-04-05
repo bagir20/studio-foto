@@ -30,45 +30,65 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-8">
-        {/* Logo */}
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-full bg-stone-800 flex items-center justify-center mx-auto">
-            <span className="w-4 h-4 rounded-full bg-amber-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-          <p className="text-stone-500 text-sm">wanpicture studio</p>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+
+      {/* Ghost watermark */}
+      <p
+        className="fixed bottom-0 right-0 font-cinzel text-[18rem] leading-none text-black/[0.03] select-none pointer-events-none tracking-tighter"
+        aria-hidden
+      >
+        W
+      </p>
+
+      <div className="w-full max-w-sm relative z-10">
+
+        {/* Header */}
+        <div className="mb-10">
+          <p className="font-cinzel text-[9px] uppercase tracking-[0.5em] text-accent font-bold mb-3">
+            Wanpicture Studio
+          </p>
+          <h1 className="font-cinzel text-3xl text-black tracking-tight leading-tight">
+            ADMIN<br />PANEL
+          </h1>
+          <div className="w-10 h-[2px] bg-accent mt-4" />
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-stone-400">Password</label>
+          <div>
+            <label className="font-cinzel text-[9px] tracking-[0.4em] uppercase text-black/35 mb-2 block">
+              Password
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Masukkan password admin"
+              placeholder="Masukkan password"
               required
-              className="w-full bg-stone-900 border border-stone-700 rounded-xl px-4 py-3 text-white placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              className="w-full border border-black/10 focus:border-black px-4 py-3 text-sm text-black placeholder:text-black/20 focus:outline-none transition-colors bg-white"
             />
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm bg-red-950 border border-red-900 px-4 py-2.5 rounded-xl">
-              {error}
-            </p>
+            <div className="border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-red-400 text-[10px] font-cinzel tracking-widest uppercase">
+                {error}
+              </p>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-amber-400 hover:bg-amber-300 disabled:bg-stone-700 disabled:text-stone-500 text-stone-900 font-bold py-3 rounded-xl transition-all duration-200"
+            className="w-full bg-black hover:bg-accent disabled:bg-black/20 text-white font-cinzel text-[10px] tracking-[0.4em] uppercase py-4 transition-all duration-300"
           >
-            {loading ? "Masuk..." : "Masuk"}
+            {loading ? "Memproses..." : "Masuk"}
           </button>
         </form>
+
+        <p className="text-black/20 text-[9px] uppercase tracking-widest font-cinzel text-center mt-8">
+          © {new Date().getFullYear()} Wanpicture Studio
+        </p>
       </div>
     </div>
   );

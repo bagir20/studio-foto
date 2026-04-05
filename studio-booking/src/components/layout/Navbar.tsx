@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/packages", label: "Packages" },
-  { href: "/gallery", label: "Gallery" },
+  { href: "/", label: "Beranda" },
+  { href: "/packages", label: "Paket" },
+  { href: "/gallery", label: "Galleri" },
 ];
 
 export default function Navbar() {
@@ -17,7 +17,14 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-black/5">
+          <header
+        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-black/5"
+        style={{
+          backgroundImage: `url("/textures/paper.jpg")`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "2500px",
+        }}
+      >
       <nav className="flex justify-between items-center w-full px-8 md:px-12 py-5">
 
         {/* Logo */}
@@ -50,7 +57,7 @@ export default function Navbar() {
           href="/booking"
           className="hidden md:inline-block bg-accent text-white px-8 py-3 text-xs tracking-[0.2em] uppercase font-cinzel hover:brightness-110 active:scale-95 transition-all duration-200"
         >
-          Book Now
+          Booking 
         </Link>
 
         {/* Hamburger */}

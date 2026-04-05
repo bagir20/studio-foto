@@ -37,47 +37,47 @@ export default async function PackagesPage({ searchParams }: Props) {
 
   return (
     <div className="bg-white min-h-screen canvas-texture">
-      <section className="px-8 md:px-12 pt-24 pb-32">
+      <section className="px-8 md:px-12 pt-10 pb-32">
         <div className="max-w-7xl mx-auto">
 
           {/* Header */}
-          <div className="mb-2">
-            <span className="text-[10px] uppercase tracking-[0.5em] text-accent font-bold">
-              Curated Experiences
-            </span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-            <h1 className="font-cinzel text-5xl md:text-7xl text-black tracking-tight leading-tight">
-              INVEST IN<br />
-              <span className="italic font-normal">Eternity</span>
-            </h1>
-            <p className="text-black/40 text-sm font-light max-w-xs leading-relaxed">
-              Setiap paket dirancang untuk memberikan hasil terbaik dengan sentuhan editorial profesional.
-            </p>
-          </div>
+<div className="mb-1">
+  <span className="text-[9px] uppercase tracking-[0.5em] text-accent font-bold">
+    Pilihan Terbaik Kami
+  </span>
+</div>
+<div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+  <h1 className="font-cinzel text-3xl md:text-5xl text-black tracking-tight leading-tight">
+    ABADIKAN Keindahan<br />
+    <span className="italic font-normal">SEMUA</span>
+  </h1>
+  <p className="text-black/40 text-sm font-light max-w-xs leading-relaxed">
+    Setiap paket dirancang untuk memberikan hasil terbaik dengan sentuhan editorial profesional.
+  </p>
+</div>
 
-          {/* Filter */}
-          <div className="flex flex-wrap gap-8 mb-16 border-b border-black/10 pb-8">
-            <Link
-              href="/packages"
-              className={`font-cinzel text-xs tracking-[0.3em] uppercase pb-1 transition-all ${
-                !category ? "text-black border-b-2 border-black" : "text-black/30 hover:text-black"
-              }`}
-            >
-              All
-            </Link>
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/packages?category=${cat.slug}`}
-                className={`font-cinzel text-xs tracking-[0.3em] uppercase pb-1 transition-all ${
-                  category === cat.slug ? "text-black border-b-2 border-black" : "text-black/30 hover:text-black"
-                }`}
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
+{/* Filter */}
+<div className="flex flex-wrap gap-6 mb-8 border-b border-black/10 pb-5">
+  <Link
+    href="/packages"
+    className={`font-cinzel text-xs tracking-[0.3em] uppercase pb-1 transition-all ${
+      !category ? "text-black border-b-2 border-black" : "text-black/30 hover:text-black"
+    }`}
+  >
+    All
+  </Link>
+  {categories.map((cat) => (
+    <Link
+      key={cat.id}
+      href={`/packages?category=${cat.slug}`}
+      className={`font-cinzel text-xs tracking-[0.3em] uppercase pb-1 transition-all ${
+        category === cat.slug ? "text-black border-b-2 border-black" : "text-black/30 hover:text-black"
+      }`}
+    >
+      {cat.name}
+    </Link>
+  ))}
+</div>
 
           {/* Packages grid */}
           {packages.length === 0 ? (

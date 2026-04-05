@@ -20,34 +20,36 @@ export default async function BookingPage() {
   const packages = await getPackages();
 
   return (
-    <div className="bg-white min-h-screen canvas-texture">
+    <div className="bg-white min-h-screen">
 
-      {/* Header */}
-      <section className="px-8 md:px-16 pt-24 pb-16 border-b border-black/5">
-        <div className="max-w-3xl">
-          <span className="font-cinzel text-[10px] tracking-[0.5em] text-accent uppercase mb-4 block">
+      {/* Header compact */}
+      <section className="px-6 md:px-16 pt-10 pb-8 border-b border-black/5">
+        <div className="max-w-lg">
+          <span className="font-cinzel text-[9px] tracking-[0.5em] text-accent uppercase mb-3 block">
             Reservasi
           </span>
-          <h1 className="font-cinzel text-5xl md:text-6xl text-black tracking-tight mb-6">
-            BOOK A<br />SESSION
+          <h1 className="font-cinzel text-3xl md:text-4xl text-black tracking-tight mb-3">
+            BOOKING SESI
           </h1>
-          <p className="text-black/40 font-light leading-relaxed max-w-md">
-            Isi form di bawah untuk memesan sesi foto. Kami akan konfirmasi via WhatsApp dalam 1×24 jam.
+          <p className="text-black/35 text-xs font-light leading-relaxed">
+            Isi form di bawah untuk memesan sesi foto.
           </p>
         </div>
       </section>
 
-      <section className="max-w-2xl px-8 md:px-16 py-16">
+      {/* Form */}
+      <div className="max-w-lg">
         <Suspense fallback={
-          <div className="space-y-6">
+          <div className="p-6 space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-14 bg-stone-100 animate-pulse" />
+              <div key={i} className="h-12 bg-stone-100 animate-pulse" />
             ))}
           </div>
         }>
           <BookingForm packages={packages} />
         </Suspense>
-      </section>
+      </div>
+
     </div>
   );
 }

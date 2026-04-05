@@ -10,7 +10,9 @@ export const bookingSchema = z.object({
 
   clientEmail: z
     .string()
-    .email("Format email tidak valid"),
+    .email("Format email tidak valid")
+    .optional()
+    .or(z.literal("")),
 
   clientPhone: z
     .string()
