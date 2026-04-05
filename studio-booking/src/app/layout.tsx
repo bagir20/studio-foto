@@ -21,10 +21,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Wanpicture — Studio Foto Palangkaraya",
+    default: "Wanpicture — Studio Foto Pulang-Pisau",
     template: "%s | Wanpicture",
   },
-  description: "Studio foto profesional di Palangkaraya.",
+  description: "Studio foto profesional di Pulang-Pisau.",
 };
 
 export default function RootLayout({
