@@ -78,7 +78,7 @@ model Booking {
 
   // Data pemesan
   clientName    String
-  clientEmail   String
+  clientEmail   String?
   clientPhone   String
 
   // Paket yang dipilih
