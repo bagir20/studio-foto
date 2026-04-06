@@ -1,6 +1,10 @@
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/prisma";
 import { formatRupiah } from "@/lib/utils";
 import BookingActions from "./BookingActions";
+
+
 
 async function getBookings() {
   return prisma.booking.findMany({
