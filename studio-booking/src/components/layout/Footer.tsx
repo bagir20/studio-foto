@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -48,21 +49,30 @@ export default function Footer() {
         <div className="flex flex-col gap-3">
           <span className="text-black font-cinzel text-xs tracking-widest font-bold">Kontak</span>
 
+          {/* Teks "Hubungi Admin Kurniawan" */}
+          <span className="text-black/60 font-sans text-[10px] uppercase tracking-widest font-semibold mt-1">
+            Hubungi Admin Kurniawan
+          </span>
+
+          {/* Nomor WA dengan Icon */}
           <a
             href="https://wa.me/6282152128370"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-black/40 hover:text-accent transition-colors text-[10px] uppercase tracking-widest"
+            className="text-black/40 hover:text-accent transition-colors text-[10px] uppercase tracking-widest flex items-center gap-2"
           >
+            <FaWhatsapp className="w-3 h-3 flex-shrink-0" />
             082152128370
           </a>
 
+          {/* IG dengan Icon */}
           <a
             href="https://www.instagram.com/wanpicture.studio_/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-black/40 hover:text-accent transition-colors text-[10px] uppercase tracking-widest"
+            className="text-black/40 hover:text-accent transition-colors text-[10px] uppercase tracking-widest flex items-center gap-2"
           >
+            <FaInstagram className="w-3 h-3 flex-shrink-0" />
             @wanpicture.studio_
           </a>
 
@@ -76,6 +86,7 @@ export default function Footer() {
             Kab. Pulang Pisau,<br />
             Kalimantan Tengah 73564
           </a>
+
         </div>
 
       </div>
