@@ -107,13 +107,13 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/booking"
-                onClick={() => setMenuOpen(false)}
-                className="mt-2 bg-accent text-white px-6 py-3 text-xs tracking-[0.2em] uppercase font-cinzel text-center"
-              >
-                Book Now
-              </Link>
+             <Link
+  href="/booking"
+  onClick={() => setMenuOpen(false)}
+  className="mt-2 bg-accent text-white px-6 py-3 text-xs tracking-[0.2em] uppercase font-cinzel font-semibold text-center"
+>
+  Booking
+</Link>
             </div>
           </motion.div>
         )}
