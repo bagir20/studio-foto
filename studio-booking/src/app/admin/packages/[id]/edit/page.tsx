@@ -28,6 +28,7 @@ export default async function EditPackagePage({ params }: Props) {
     isActive: pkg.isActive,
     categoryId: pkg.categoryId,
     tiers: pkg.tiers.map((t) => ({
+      id: t.id,
       name: t.name,
       price: String(t.price),
       duration: String(t.duration),

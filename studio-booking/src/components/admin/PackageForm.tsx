@@ -12,8 +12,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-type Tier = { name: string; price: string; duration: string; includes: string };
-type SamplePhoto = { id?: string; imageUrl: string; caption: string };
+type Tier = { id?: string; name: string; price: string; duration: string; includes: string };type SamplePhoto = { id?: string; imageUrl: string; caption: string };
 
 type Props = {
   categories: PackageCategory[];
@@ -78,8 +77,16 @@ export default function PackageForm({ categories, initialData }: Props) {
   });
 
   const [tiers, setTiers] = useState<Tier[]>(
-    initialData?.tiers ?? [{ ...emptyTier }]
-  );
+  initialData?.tiers
+    ? initialData.tiers.map((t) => ({
+        id: t.id,           // ← tambah ini
+        name: t.name,
+        price: t.price,
+        duration: t.duration,
+        includes: t.includes,
+      }))
+    : [{ ...emptyTier }]
+);
 
   const [samples, setSamples] = useState<SamplePhoto[]>(
     initialData?.samples ?? []
@@ -147,6 +154,7 @@ export default function PackageForm({ categories, initialData }: Props) {
     const payload = {
       ...form,
       tiers: tiers.map((t) => ({
+        ...(t.id ? { id: t.id } : {}),
         name: t.name,
         price: parseInt(t.price),
         duration: parseInt(t.duration),
